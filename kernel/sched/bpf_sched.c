@@ -152,7 +152,6 @@ __bpf_kfunc s32 bpf_sched_cpu_stats_of(int cpuid,
 		return -EINVAL;
 
 	rq = cpu_rq(cpu);
-	memset(ctx, 0, sizeof(*ctx));
 
 	SCHED_WARN_ON(!rcu_read_lock_held());
 	/* nr_running */
