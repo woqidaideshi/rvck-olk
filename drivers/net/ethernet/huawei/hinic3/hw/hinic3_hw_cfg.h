@@ -322,6 +322,8 @@ struct cfg_mgmt_info {
 		(((u32)(dev)->cfg_mgmt->svc_cap.chip_svc_type) & CFG_SERVICE_MASK_PPA)
 #define IS_MIGR_TYPE(dev) \
 		(((u32)(dev)->cfg_mgmt->svc_cap.chip_svc_type) & CFG_SERVICE_MASK_MIGRATE)
+#define IS_BIFUR_TYPE(dev) \
+		(((u32)(dev)->cfg_mgmt->svc_cap.chip_svc_type) & CFG_SERVICE_MASK_BIFUR)
 
 int init_cfg_mgmt(struct hinic3_hwdev *dev);
 

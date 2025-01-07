@@ -622,6 +622,9 @@ void hinic3_get_card_info(const void *hwdev, void *bufin)
 		if (hinic3_func_for_mgmt(fun_hwdev))
 			strscpy(info->pf[i].name, "FOR_MGMT", IFNAMSIZ);
 
+		if (dev->lld_dev.pdev->subsystem_device == BIFUR_RESOURCE_PF_SSID)
+			strscpy(info->pf[i].name, "bifur", IFNAMSIZ);
+
 		strscpy(info->pf[i].bus_info, pci_name(dev->pcidev),
 			sizeof(info->pf[i].bus_info));
 		info->pf_num++;

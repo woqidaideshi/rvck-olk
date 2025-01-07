@@ -1091,8 +1091,17 @@ struct hinic3_bond_mask_cmd {
 	u8 rsvd[3];
 };
 
+struct hinic3_func_er_value_cmd {
+	struct hinic3_mgmt_msg_head msg_head;
+	u16 vf_id;
+	u16 er_fwd_id;
+};
+
 #define HINIC3_TX_SET_PROMISC_SKIP 0
 #define HINIC3_TX_GET_PROMISC_SKIP 1
+
+#define HINIC3_GET_TRAFFIC_BIFUR_STATE 0
+#define HINIC3_SET_TRAFFIC_BIFUR_STATE 1
 
 struct hinic3_tx_promisc_cfg {
 	struct hinic3_mgmt_msg_head msg_head;

@@ -73,7 +73,7 @@ void hinic3_uld_lock_init(void)
 
 static const char *s_uld_name[SERVICE_T_MAX] = {
 	"nic", "ovs", "roce", "toe", "ioe",
-	"fc", "vbs", "ipsec", "virtio", "migrate", "ppa", "custom"};
+	"fc", "vbs", "ipsec", "virtio", "migrate", "ppa", "bifur", "custom"};
 
 const char **hinic3_get_uld_names(void)
 {

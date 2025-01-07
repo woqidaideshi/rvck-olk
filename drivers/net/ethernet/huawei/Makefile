@@ -6,3 +6,4 @@
 obj-$(CONFIG_HINIC) += hinic/
 obj-$(CONFIG_HINIC3) += hinic3/
 obj-$(CONFIG_BMA) += bma/
+obj-$(CONFIG_HIBIFUR) += hibifur/

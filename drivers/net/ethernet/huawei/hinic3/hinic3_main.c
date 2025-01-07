@@ -89,6 +89,8 @@ enum hinic3_rx_buff_len {
 
 #define CONVERT_UNIT			1024
 
+#define BIFUR_RESOURCE_PF_SSID 0x5a1
+
 #ifdef HAVE_MULTI_VLAN_OFFLOAD_EN
 static int hinic3_netdev_event(struct notifier_block *notifier, unsigned long event, void *ptr);
 
@@ -876,11 +878,13 @@ static int nic_probe(struct hinic3_lld_dev *lld_dev, void **uld_dev,
 	hinic3_register_notifier(nic_dev);
 #endif
 
-	err = register_netdev(netdev);
-	if (err) {
-		nic_err(&pdev->dev, "Failed to register netdev\n");
-		err = -ENOMEM;
-		goto netdev_err;
+	if (pdev->subsystem_device != BIFUR_RESOURCE_PF_SSID) {
+		err = register_netdev(netdev);
+		if (err) {
+			nic_err(&pdev->dev, "Failed to register netdev\n");
+			err = -ENOMEM;
+			goto netdev_err;
+		}
 	}
 
 	queue_delayed_work(nic_dev->workq, &nic_dev->periodic_work, HZ);
@@ -928,7 +932,9 @@ static void nic_remove(struct hinic3_lld_dev *lld_dev, void *adapter)
 
 	netdev = nic_dev->netdev;
 
-	unregister_netdev(netdev);
+	if (lld_dev->pdev->subsystem_device != BIFUR_RESOURCE_PF_SSID)
+		unregister_netdev(netdev);
+
 #ifdef HAVE_MULTI_VLAN_OFFLOAD_EN
 	hinic3_unregister_notifier(nic_dev);
 #endif
