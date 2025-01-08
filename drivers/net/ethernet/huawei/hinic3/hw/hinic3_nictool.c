@@ -550,8 +550,17 @@ static struct hinic3_lld_dev *get_lld_dev_by_nt_msg(struct msg_module *nt_msg)
 {
 	struct hinic3_lld_dev *lld_dev = NULL;
 
-	if (nt_msg->module >= SEND_TO_SRV_DRV_BASE && nt_msg->module < SEND_TO_DRIVER_MAX &&
-	    nt_msg->module != SEND_TO_HW_DRIVER && nt_msg->msg_formate != GET_DRV_VERSION) {
+	if (nt_msg->module == SEND_TO_NIC_DRIVER && (nt_msg->msg_formate == GET_XSFP_INFO ||
+	    nt_msg->msg_formate == GET_XSFP_PRESENT ||
+	    nt_msg->msg_formate == GET_XSFP_INFO_COMP_CMIS)) {
+		lld_dev = hinic3_get_lld_dev_by_chip_and_port(nt_msg->device_name, nt_msg->port_id);
+	} else if (nt_msg->module == SEND_TO_CUSTOM_DRIVER &&
+		   nt_msg->msg_formate == CMD_CUSTOM_BOND_GET_CHIP_NAME) {
+		lld_dev = hinic3_get_lld_dev_by_dev_name(nt_msg->device_name, SERVICE_T_MAX);
+	} else if (nt_msg->module == SEND_TO_VBS_DRIVER || nt_msg->module == SEND_TO_BIFUR_DRIVER) {
+		lld_dev = hinic3_get_lld_dev_by_chip_name(nt_msg->device_name);
+	} else  if (nt_msg->module >= SEND_TO_SRV_DRV_BASE && nt_msg->module < SEND_TO_DRIVER_MAX &&
+		nt_msg->msg_formate != GET_DRV_VERSION) {
 		lld_dev = hinic3_get_lld_dev_by_dev_name(nt_msg->device_name,
 							 nt_msg->module - SEND_TO_SRV_DRV_BASE);
 	} else {
@@ -560,15 +569,6 @@ static struct hinic3_lld_dev *get_lld_dev_by_nt_msg(struct msg_module *nt_msg)
 			lld_dev = hinic3_get_lld_dev_by_dev_name(nt_msg->device_name,
 								 SERVICE_T_MAX);
 	}
-
-	if (nt_msg->module == SEND_TO_NIC_DRIVER && (nt_msg->msg_formate == GET_XSFP_INFO ||
-						     nt_msg->msg_formate == GET_XSFP_PRESENT))
-		lld_dev = hinic3_get_lld_dev_by_chip_and_port(nt_msg->device_name,
-							      nt_msg->port_id);
-
-	if (nt_msg->module == SEND_TO_CUSTOM_DRIVER &&
-	    nt_msg->msg_formate == CMD_CUSTOM_BOND_GET_CHIP_NAME)
-		lld_dev = hinic3_get_lld_dev_by_dev_name(nt_msg->device_name, SERVICE_T_MAX);
 
 	return lld_dev;
 }

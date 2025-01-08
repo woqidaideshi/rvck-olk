@@ -1172,6 +1172,20 @@ bool hinic3_support_ppa(void *hwdev, struct ppa_service_cap *cap)
 }
 EXPORT_SYMBOL(hinic3_support_ppa);
 
+bool hinic3_support_bifur(void *hwdev, struct bifur_service_cap *cap)
+{
+	struct hinic3_hwdev *dev = (struct hinic3_hwdev *)hwdev;
+
+	if (!hwdev)
+		return false;
+
+	if (!IS_BIFUR_TYPE(dev))
+		return false;
+
+	return true;
+}
+EXPORT_SYMBOL(hinic3_support_bifur);
+
 bool hinic3_support_migr(void *hwdev, struct migr_service_cap *cap)
 {
 	struct hinic3_hwdev *dev = hwdev;

@@ -45,6 +45,7 @@ enum hinic3_service_type {
 	SERVICE_T_CUSTOM,
 	SERVICE_T_VROCE,
 	SERVICE_T_CRYPT,
+	SERVICE_T_BIFUR,
 	SERVICE_T_MAX,
 
 	/* Only used for interruption resource management,
@@ -74,6 +75,10 @@ struct ppa_service_cap {
 	u8 bloomfilter_en;
 	u8 rsvd;
 	u16 rsvd1;
+};
+
+struct bifur_service_cap {
+	u8 rsvd;
 };
 
 struct vbs_service_cap {
@@ -784,6 +789,15 @@ bool hinic3_support_toe(void *hwdev, struct toe_service_cap *cap);
  * @retval non-zero: failure
  */
 bool hinic3_support_ppa(void *hwdev, struct ppa_service_cap *cap);
+
+/* *
+ * @brief hinic3_support_bifur - function support bifur
+ * @param hwdev: device pointer to hwdev
+ * @param cap: bifur service capbility
+ * @retval zero: success
+ * @retval non-zero: failure
+ */
+bool hinic3_support_bifur(void *hwdev, struct bifur_service_cap *cap);
 
 /* *
  * @brief hinic3_support_migr - function support migrate
