@@ -988,13 +988,14 @@ static void record_times(struct psi_group_cpu *groupc, u64 now)
 }
 
 static void psi_group_change(struct psi_group *group, int cpu,
-			     unsigned int clear, unsigned int set, u64 now,
+			     unsigned int clear, unsigned int set,
 			     bool wake_clock)
 {
 	struct psi_group_cpu *groupc;
 	unsigned int t, m;
 	enum psi_states s;
 	u32 state_mask;
+	u64 now;
 
 	groupc = per_cpu_ptr(group->pcpu, cpu);
 
@@ -1008,6 +1009,7 @@ static void psi_group_change(struct psi_group *group, int cpu,
 	 * SOME and FULL time these may have resulted in.
 	 */
 	write_seqcount_begin(&groupc->seq);
+	now = cpu_clock(cpu);
 
 	/*
 	 * Start with TSK_ONCPU, which doesn't have a corresponding
@@ -1150,7 +1152,6 @@ void psi_task_change(struct task_struct *task, int clear, int set)
 {
 	int cpu = task_cpu(task);
 	struct psi_group *group;
-	u64 now;
 	int stat_set = 0;
 	int stat_clear = 0;
 
@@ -1160,11 +1161,9 @@ void psi_task_change(struct task_struct *task, int clear, int set)
 	psi_flags_change(task, clear, set);
 	psi_stat_flags_change(task, &stat_set, &stat_clear, set, clear);
 
-	now = cpu_clock(cpu);
-
 	group = task_psi_group(task);
 	do {
-		psi_group_change(group, cpu, clear, set, now, true);
+		psi_group_change(group, cpu, clear, set, true);
 		psi_group_stat_change(group, cpu, stat_clear, stat_set);
 	} while ((group = group->parent));
 }
@@ -1174,7 +1173,6 @@ void psi_task_switch(struct task_struct *prev, struct task_struct *next,
 {
 	struct psi_group *group, *common = NULL;
 	int cpu = task_cpu(prev);
-	u64 now = cpu_clock(cpu);
 
 	if (next->pid) {
 		update_throttle_type(next, cpu, true);
@@ -1192,7 +1190,7 @@ void psi_task_switch(struct task_struct *prev, struct task_struct *next,
 				break;
 			}
 
-			psi_group_change(group, cpu, 0, TSK_ONCPU, now, true);
+			psi_group_change(group, cpu, 0, TSK_ONCPU, true);
 			psi_group_stat_change(group, cpu, 0, 0);
 		} while ((group = group->parent));
 	}
@@ -1236,7 +1234,7 @@ void psi_task_switch(struct task_struct *prev, struct task_struct *next,
 		do {
 			if (group == common)
 				break;
-			psi_group_change(group, cpu, clear, set, now, wake_clock);
+			psi_group_change(group, cpu, clear, set, wake_clock);
 			psi_group_stat_change(group, cpu, stat_clear, stat_set);
 		} while ((group = group->parent));
 
@@ -1255,7 +1253,7 @@ void psi_task_switch(struct task_struct *prev, struct task_struct *next,
 		     memstall_type_change) {
 			clear &= ~TSK_ONCPU;
 			for (; group; group = group->parent) {
-				psi_group_change(group, cpu, clear, set, now, wake_clock);
+				psi_group_change(group, cpu, clear, set, wake_clock);
 				psi_group_stat_change(group, cpu, stat_clear, stat_set);
 			}
 		}
@@ -1268,7 +1266,6 @@ void psi_account_irqtime(struct task_struct *task, u32 delta)
 	int cpu = task_cpu(task);
 	struct psi_group *group;
 	struct psi_group_cpu *groupc;
-	u64 now;
 
 	if (static_branch_likely(&psi_disabled))
 		return;
@@ -1276,14 +1273,15 @@ void psi_account_irqtime(struct task_struct *task, u32 delta)
 	if (!task->pid)
 		return;
 
-	now = cpu_clock(cpu);
-
 	group = task_psi_group(task);
 	do {
+		u64 now;
+
 		if (!group->enabled)
 			continue;
 
 		groupc = per_cpu_ptr(group->pcpu, cpu);
+		now = cpu_clock(cpu);
 
 		write_seqcount_begin(&groupc->seq);
 
@@ -1497,11 +1495,9 @@ void psi_cgroup_restart(struct psi_group *group)
 	for_each_possible_cpu(cpu) {
 		struct rq *rq = cpu_rq(cpu);
 		struct rq_flags rf;
-		u64 now;
 
 		rq_lock_irq(rq, &rf);
-		now = cpu_clock(cpu);
-		psi_group_change(group, cpu, 0, 0, now, true);
+		psi_group_change(group, cpu, 0, 0, true);
 		rq_unlock_irq(rq, &rf);
 	}
 }
