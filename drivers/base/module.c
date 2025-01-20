@@ -7,6 +7,7 @@
 #include <linux/errno.h>
 #include <linux/slab.h>
 #include <linux/string.h>
+#include <linux/rcupdate.h>
 #include "base.h"
 
 static char *make_driver_name(struct device_driver *drv)
@@ -100,6 +101,9 @@ void module_remove_driver(struct device_driver *drv)
 
 	if (!drv)
 		return;
+
+	/* Synchronize with dev_uevent() */
+	synchronize_rcu();
 
 	sysfs_remove_link(&drv->p->kobj, "module");
 
