@@ -7138,14 +7138,16 @@ static int __hns_roce_request_irq(struct hns_roce_dev *hr_dev, int irq_num,
 	return 0;
 
 err_request_failed:
-	for (j -= 1; j >= 0; j--)
+	for (j -= 1; j >= 0; j--) {
 		if (j < other_num) {
 			free_irq(hr_dev->irq[j], hr_dev);
-		} else {
-			free_irq(eq_table->eq[j - other_num].irq,
-				 &eq_table->eq[j - other_num]);
-			tasklet_kill(&eq_table->eq[j - other_num].tasklet);
+			continue;
 		}
+		free_irq(eq_table->eq[j - other_num].irq,
+			 &eq_table->eq[j - other_num]);
+		if (j < other_num + comp_num)
+			tasklet_kill(&eq_table->eq[j - other_num].tasklet);
+	}
 
 err_kzalloc_failed:
 	for (i -= 1; i >= 0; i--)
