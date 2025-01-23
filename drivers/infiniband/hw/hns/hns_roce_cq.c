@@ -239,7 +239,6 @@ static void free_cqc(struct hns_roce_dev *hr_dev, struct hns_roce_cq *hr_cq)
 				    ret, hr_cq->cqn);
 	}
 
-	xa_erase(&cq_table->array, hr_cq->cqn);
 	xa_erase_irq(&cq_table->array, hr_cq->cqn);
 
 	/* Waiting interrupt process procedure carried out */
