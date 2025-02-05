@@ -155,6 +155,7 @@ static int hundred_thousand = 100000;
 static int __unthrottle_qos_cfs_rqs(int cpu);
 static int unthrottle_qos_cfs_rqs(int cpu);
 static bool qos_smt_expelled(int this_cpu);
+static bool is_offline_task(struct task_struct *p);
 #endif
 
 #ifdef CONFIG_QOS_SCHED_SMT_EXPELLER
@@ -9354,6 +9355,11 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 		goto preempt;
 	if (cse_is_idle != pse_is_idle)
 		return;
+
+#ifdef CONFIG_QOS_SCHED
+	if (unlikely(is_offline_task(curr) && !is_offline_task(p)))
+		goto preempt;
+#endif
 
 	/*
 	 * BATCH and IDLE tasks do not preempt others.
