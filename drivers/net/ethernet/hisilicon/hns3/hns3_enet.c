@@ -395,7 +395,7 @@ static void hns3_dma_map_sync(struct device *dev, unsigned long iova)
 	struct iommu_iotlb_gather iotlb_gather;
 	size_t granule;
 
-	if (!domain || domain->type != IOMMU_DOMAIN_DMA)
+	if (!domain || !iommu_is_dma_domain(domain))
 		return;
 
 	granule = 1 << __ffs(domain->pgsize_bitmap);
@@ -6350,9 +6350,11 @@ module_init(hns3_init_module);
  */
 static void __exit hns3_exit_module(void)
 {
+	hnae3_acquire_unload_lock();
 	pci_unregister_driver(&hns3_driver);
 	hnae3_unregister_client(&client);
 	hns3_dbg_unregister_debugfs();
+	hnae3_release_unload_lock();
 }
 module_exit(hns3_exit_module);
 
