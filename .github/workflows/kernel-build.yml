@@ -1,0 +1,40 @@
+name: kernel build test
+
+on:
+  pull_request:
+    branches: [ "OLK-*" ]
+
+  push:
+    branches: [ "OLK-*" ]
+
+  workflow_dispatch:
+
+env:
+  NUM_JOBS: 6
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependency
+        run: |
+          sudo apt update
+          sudo apt install make flex bison bc gcc-riscv64-linux-gnu libelf-dev dwarves -y
+          riscv64-linux-gnu-gcc -v
+        timeout-minutes: 5
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          clean: true
+
+      - name: Remove unnecessary files
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+
+      - name: Build
+        run: |
+          export CROSS_COMPILE=riscv64-linux-gnu-
+          make mrproper -j$(nproc)
+          make ARCH=riscv openeuler_defconfig
+          make ARCH=riscv -j$(nproc) Image modules dtbs
+          make INSTALL_MOD_PATH=${{github.workspace}}/install modules_install

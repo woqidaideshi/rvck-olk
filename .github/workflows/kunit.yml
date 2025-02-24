@@ -1,0 +1,34 @@
+name: KUnit test
+
+on:
+  pull_request:
+    branches: [ "OLK-*" ]
+
+  push:
+    branches: [ "OLK-*" ]
+
+  workflow_dispatch:
+
+env:
+  NUM_JOBS: 6
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependency
+        run: |
+          sudo apt update
+          sudo apt install make gcc-riscv64-linux-gnu flex bison bc qemu-system-misc -y
+        timeout-minutes: 5
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          clean: true
+
+      - name: kunit
+        run: |
+          export CROSS_COMPILE=riscv64-linux-gnu-
+          make mrproper -j$(nproc)
+          ./tools/testing/kunit/kunit.py run --arch=riscv
