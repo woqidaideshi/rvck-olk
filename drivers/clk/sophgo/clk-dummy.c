@@ -51,7 +51,7 @@ static unsigned long mango_clk_divider_recalc_rate(struct clk_hw *hw,
 
 	node = of_find_node_by_name(NULL, "default_rates");
 
-	of_property_for_each_u32 (node, "clock-rates", prop, cur, rate) {
+	of_property_for_each_u32 (node, "clock-rates", rate) {
 		if (rate) {
 			rc = of_parse_phandle_with_args(node, "clocks",
 							"#clock-cells", index, &clkspec);
@@ -105,7 +105,7 @@ static unsigned long mango_clk_pll_recalc_rate(struct clk_hw *hw,
 
 	node = of_find_node_by_name(NULL, "default_rates");
 
-	of_property_for_each_u32 (node, "clock-rates", prop, cur, rate) {
+	of_property_for_each_u32 (node, "clock-rates", rate) {
 		if (rate) {
 			rc = of_parse_phandle_with_args(node, "clocks",
 							"#clock-cells", index, &clkspec);
@@ -234,7 +234,7 @@ int dm_set_default_clk_rates(struct device_node *node)
 	struct clk *clk;
 	u32 rate;
 
-	of_property_for_each_u32 (node, "clock-rates", prop, cur, rate) {
+	of_property_for_each_u32 (node, "clock-rates", rate) {
 		if (rate) {
 			rc = of_parse_phandle_with_args(node, "clocks",
 							"#clock-cells", index, &clkspec);
