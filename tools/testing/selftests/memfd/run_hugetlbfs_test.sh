@@ -44,7 +44,7 @@ fi
 # If still not enough huge pages available, exit.  But, give back any huge
 # pages potentially allocated above.
 #
-if [ $freepgs -lt $hpages_test ]; then
+if [ -n "$freepgs" ] && [ $freepgs -lt $hpages_test ]; then
 	# nr_hugepgs non-zero only if we attempted to increase
 	if [ -n "$nr_hugepgs" ]; then
 		echo $nr_hugepgs > /proc/sys/vm/nr_hugepages
