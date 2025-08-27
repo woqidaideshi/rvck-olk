@@ -1,10 +1,16 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 
-if test -d "./mnt" ; then
-	fusermount -u ./mnt
-	rmdir ./mnt
-fi
+trap 'umount_mnt' EXIT
+
+umount_mnt(){
+	if test -d "./mnt" ; then
+		fusermount -u ./mnt
+		rmdir ./mnt
+	fi
+}
+
+umount_mnt
 
 set -e
 
