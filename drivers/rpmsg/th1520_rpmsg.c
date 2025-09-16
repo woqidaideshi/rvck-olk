@@ -454,6 +454,7 @@ int get_audio_log_mem(struct device *dev, phys_addr_t *mem, size_t *mem_size)
 
 static int th1520_rpmsg_probe(struct platform_device *pdev)
 {
+	pr_info("th1520 rpmsg: in th1520_rpmsg_probe!\n");
 	int core_id, j, ret = 0;
 	struct device *dev = &pdev->dev;
 	struct device_node *np = pdev->dev.of_node;
@@ -546,6 +547,7 @@ static int th1520_rpmsg_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, rpdev);
+	pr_info("th1520 rpmsg: in th1520_rpmsg_probe end!\n");
 
 	return ret;
 }
@@ -700,6 +702,11 @@ static struct platform_driver th1520_rpmsg_driver = {
 
 static int __init th1520_rpmsg_init(void)
 {
+	// if (!of_machine_is_compatible("th1520")) {
+	// 	pr_info("th1520_rpmsg: Skipping on non-TH1520 platform\n");
+	// 	return -ENODEV;
+	// }
+
 	int ret;
 
 	ret = platform_driver_register(&th1520_rpmsg_driver);
@@ -711,10 +718,19 @@ static int __init th1520_rpmsg_init(void)
 	return ret;
 }
 
+static void __exit th1520_rpmsg_exit(void)
+{
+	platform_driver_unregister(&th1520_rpmsg_driver);
+	pr_info("th1520 rpmsg: th1520_rpmsg_exit.\n");
+
+}
+
+late_initcall(th1520_rpmsg_init);
+module_exit(th1520_rpmsg_exit);
+
 MODULE_AUTHOR(",Inc.");
 MODULE_DESCRIPTION("remote processor messaging virtio device");
 MODULE_LICENSE("GPL v2");
-late_initcall(th1520_rpmsg_init);
 
 static ssize_t mbox_client_th1520_message_write(struct file *filp,
 						const char __user *userbuf,
